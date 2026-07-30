@@ -2,9 +2,9 @@ import { ArrowRight } from "lucide-react";
 
 export default function CTA() {
   return (
-    <section className="bg-[#0B1D3A] px-4 py-20">
+    <section className="bg-gradient-to-br from-primary to-primary-hover px-4 py-20">
       <div className="mx-auto max-w-3xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-wide text-[#AD8A54]">
+        <p className="text-xs font-semibold uppercase tracking-wide text-accent">
           Enroll now
         </p>
         <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
@@ -16,11 +16,11 @@ export default function CTA() {
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <button className="flex items-center gap-2 rounded-md bg-white px-6 py-3 text-sm font-medium text-[#0B1D3A] hover:bg-[#F4EDE0]">
+          <button className="flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-medium text-white hover:bg-accent-hover">
             Book a trial class
             <ArrowRight className="h-4 w-4" />
           </button>
-          <button className="rounded-md border border-white/30 px-6 py-3 text-sm font-medium text-white hover:border-[#AD8A54]">
+          <button className="rounded-md bg-white px-6 py-3 text-sm font-medium text-primary hover:bg-white/90">
             Talk to us
           </button>
         </div>

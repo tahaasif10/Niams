@@ -31,6 +31,7 @@ export default function Testimonials() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [skipTransition, setSkipTransition] = useState(false);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const dragStartX = useRef<number>(0);
   const dragCurrentX = useRef<number>(0);
@@ -70,6 +71,26 @@ export default function Testimonials() {
 
   const activeDot = ((index % count) + count) % count;
 
+  // After the slide transition finishes, fully normalize index back into
+  // [0, count) using modulo — not just a single ± count step. This makes it
+  // resilient to rapid clicking, which can drift index by more than one
+  // step before a transitionend ever fires.
+  const handleTransitionEnd = () => {
+    if (index >= count || index < 0) {
+      setSkipTransition(true);
+      setIndex((i) => ((i % count) + count) % count);
+    }
+  };
+
+  useEffect(() => {
+    if (!skipTransition) return;
+    const raf1 = requestAnimationFrame(() => {
+      const raf2 = requestAnimationFrame(() => setSkipTransition(false));
+      return () => cancelAnimationFrame(raf2);
+    });
+    return () => cancelAnimationFrame(raf1);
+  }, [skipTransition]);
+
   const handleDragStart = (clientX: number) => {
     setIsDragging(true);
     dragStartX.current = clientX;
@@ -92,24 +113,30 @@ export default function Testimonials() {
     setDragOffset(0);
   };
 
+  // Build the rendered window dynamically around the current index, instead
+  // of a fixed-size window independent of it. This guarantees there's
+  // always a valid slide to render at every position the transform can
+  // point to, no matter how far index has drifted from [0, count).
+  const lowerBound = Math.min(0, index) - visibleCount;
+  const upperBound = Math.max(count - 1, index) + visibleCount;
   const extended = [];
-  for (let i = -visibleCount; i < count + visibleCount; i++) {
+  for (let i = lowerBound; i <= upperBound; i++) {
     const t = TESTIMONIALS[((i % count) + count) % count];
     extended.push({ ...t, key: `${i}-${t.name}` });
   }
-  const baseOffset = visibleCount;
+  const baseOffset = -lowerBound;
   const translatePct =
     -(baseOffset + index) * slideWidthPct +
     (dragOffset / (trackRef.current?.offsetWidth || 1)) * 100;
 
   return (
-    <section className="bg-[#F8FAFC] px-4 py-20">
+    <section className="bg-surface-alt px-4 py-20">
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#0052C2]">
+          <span className="text-xs font-bold uppercase tracking-wider text-accent-hover">
             Proven Success
           </span>
-          <h2 className="mt-3 text-3xl font-extrabold text-[#1A2552] md:text-4xl">
+          <h2 className="mt-3 text-3xl font-extrabold text-primary md:text-4xl">
             The work speaks through those who did it
           </h2>
         </div>
@@ -128,9 +155,11 @@ export default function Testimonials() {
               className="flex select-none"
               style={{
                 transform: `translateX(${translatePct}%)`,
-                transition: isDragging ? "none" : "transform 500ms ease",
+                transition:
+                  isDragging || skipTransition ? "none" : "transform 500ms ease",
                 cursor: isDragging ? "grabbing" : "grab",
               }}
+              onTransitionEnd={handleTransitionEnd}
               onMouseDown={(e) => handleDragStart(e.clientX)}
               onMouseMove={(e) => handleDragMove(e.clientX)}
               onMouseUp={handleDragEnd}
@@ -144,32 +173,32 @@ export default function Testimonials() {
                   className="shrink-0 px-3"
                   style={{ width: `${slideWidthPct}%` }}
                 >
-                  <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-sm md:p-10">
+                  <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-line bg-white p-8 shadow-sm md:p-10">
                     <Quote
-                      className="pointer-events-none absolute -right-3 -top-3 h-24 w-24 text-[#0052C2]/10"
+                      className="pointer-events-none absolute -right-3 -top-3 h-24 w-24 text-accent/10"
                       strokeWidth={1.5}
                     />
-                    <div className="absolute left-0 top-0 h-1 w-full bg-[#F2994A]" />
+                    <div className="absolute left-0 top-0 h-1 w-full bg-accent" />
 
                     <div className="relative">
                       <div className="flex gap-1">
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star
                             key={i}
-                            className="h-4 w-4 fill-[#F2994A] text-[#F2994A]"
+                            className="h-4 w-4 fill-accent text-accent"
                           />
                         ))}
                       </div>
-                      <p className="mt-5 text-base italic leading-relaxed text-[#334155] md:text-lg">
+                      <p className="mt-5 text-base italic leading-relaxed text-gray-500 md:text-lg">
                         &ldquo;{testimonial.quote}&rdquo;
                       </p>
                     </div>
 
                     <div className="relative mt-8">
-                      <p className="text-base font-bold text-[#1A2552]">
+                      <p className="text-base font-bold text-primary">
                         {testimonial.name}
                       </p>
-                      <p className="text-xs font-medium text-[#0052C2]">
+                      <p className="text-xs font-medium text-accent-hover">
                         {testimonial.role}
                       </p>
                     </div>
@@ -184,7 +213,7 @@ export default function Testimonials() {
               type="button"
               aria-label="Previous testimonial"
               onClick={prev}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E2E8F0] bg-white text-[#1A2552] shadow-sm transition-colors hover:bg-[#1A2552] hover:text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white text-primary shadow-sm transition-colors hover:bg-primary hover:text-white"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -192,7 +221,7 @@ export default function Testimonials() {
               type="button"
               aria-label="Next testimonial"
               onClick={next}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E2E8F0] bg-white text-[#1A2552] shadow-sm transition-colors hover:bg-[#1A2552] hover:text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white text-primary shadow-sm transition-colors hover:bg-primary hover:text-white"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -208,7 +237,7 @@ export default function Testimonials() {
               onClick={() => goTo(i)}
               className={
                 i === activeDot
-                  ? "h-2 w-8 rounded-full bg-[#0052C2] transition-all"
+                  ? "h-2 w-8 rounded-full bg-accent transition-all"
                   : "h-2 w-2 rounded-full bg-gray-300 transition-all"
               }
             />

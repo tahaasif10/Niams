@@ -60,7 +60,7 @@ export default function Hero() {
 
           <h1 className="mt-6 text-4xl font-bold leading-tight text-primary sm:text-5xl">
             Forge your future with{" "}
-            <span className="relative whitespace-nowrap text-accent-hover">
+            <span className="relative whitespace-nowrap bg-linear-to-r from-[#c9a875] via-[#ad8a54] to-[#8a6a3a] bg-[length:200%_auto] bg-clip-text text-transparent animate-[shimmer_3s_ease-in-out_infinite]">
               clear, hard thinking
               <svg
                 aria-hidden
