@@ -27,18 +27,17 @@ const AUTOPLAY_MS = 5000;
 
 export default function Testimonials() {
   const [visibleCount, setVisibleCount] = useState(3);
-  const [index, setIndex] = useState(0); // logical index, can exceed bounds; we mod it
+  const [index, setIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const trackRef = useRef(null);
-  const dragStartX = useRef(0);
-  const dragCurrentX = useRef(0);
-  const autoplayRef = useRef(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const dragStartX = useRef<number>(0);
+  const dragCurrentX = useRef<number>(0);
+  const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const count = TESTIMONIALS.length;
 
-  // Responsive visible-card count
   useEffect(() => {
     const updateVisible = () => {
       if (window.innerWidth >= 1024) setVisibleCount(3);
@@ -59,26 +58,25 @@ export default function Testimonials() {
   const next = useCallback(() => setIndex((i) => i + 1), []);
   const prev = useCallback(() => setIndex((i) => i - 1), []);
 
-  // Autoplay loop
   useEffect(() => {
     if (isPaused || isDragging) return;
     autoplayRef.current = setInterval(() => {
       setIndex((i) => i + 1);
     }, AUTOPLAY_MS);
-    return () => clearInterval(autoplayRef.current);
+    return () => {
+      if (autoplayRef.current) clearInterval(autoplayRef.current);
+    };
   }, [isPaused, isDragging]);
 
-  // Normalize the active dot (0-indexed within TESTIMONIALS.length)
   const activeDot = ((index % count) + count) % count;
 
-  // Drag / swipe handlers
-  const handleDragStart = (clientX) => {
+  const handleDragStart = (clientX: number) => {
     setIsDragging(true);
     dragStartX.current = clientX;
     dragCurrentX.current = clientX;
   };
 
-  const handleDragMove = (clientX) => {
+  const handleDragMove = (clientX: number) => {
     if (!isDragging) return;
     dragCurrentX.current = clientX;
     setDragOffset(clientX - dragStartX.current);
@@ -94,14 +92,12 @@ export default function Testimonials() {
     setDragOffset(0);
   };
 
-  // Build an extended track so the slider always has a card to show while
-  // looping seamlessly in either direction.
   const extended = [];
   for (let i = -visibleCount; i < count + visibleCount; i++) {
     const t = TESTIMONIALS[((i % count) + count) % count];
     extended.push({ ...t, key: `${i}-${t.name}` });
   }
-  const baseOffset = visibleCount; // where the "real" set starts in `extended`
+  const baseOffset = visibleCount;
   const translatePct =
     -(baseOffset + index) * slideWidthPct +
     (dragOffset / (trackRef.current?.offsetWidth || 1)) * 100;
@@ -109,7 +105,6 @@ export default function Testimonials() {
   return (
     <section className="bg-[#F8FAFC] px-4 py-20">
       <div className="mx-auto max-w-5xl">
-        {/* Heading */}
         <div className="text-center">
           <span className="text-xs font-bold uppercase tracking-wider text-[#0052C2]">
             Proven Success
@@ -119,7 +114,6 @@ export default function Testimonials() {
           </h2>
         </div>
 
-        {/* Slider */}
         <div
           className="relative mt-12"
           onMouseEnter={() => setIsPaused(true)}
@@ -151,12 +145,10 @@ export default function Testimonials() {
                   style={{ width: `${slideWidthPct}%` }}
                 >
                   <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-sm md:p-10">
-                    {/* Watermark quote icon */}
                     <Quote
                       className="pointer-events-none absolute -right-3 -top-3 h-24 w-24 text-[#0052C2]/10"
                       strokeWidth={1.5}
                     />
-                    {/* Top accent bar */}
                     <div className="absolute left-0 top-0 h-1 w-full bg-[#F2994A]" />
 
                     <div className="relative">
@@ -187,7 +179,6 @@ export default function Testimonials() {
             </div>
           </div>
 
-          {/* Navigation controls */}
           <div className="mt-8 flex items-center justify-center gap-4 md:absolute md:-right-2 md:top-1/2 md:mt-0 md:-translate-y-1/2 md:flex-col md:justify-start md:gap-3">
             <button
               type="button"
@@ -208,7 +199,6 @@ export default function Testimonials() {
           </div>
         </div>
 
-        {/* Pagination dots */}
         <div className="mt-8 flex items-center justify-center gap-2">
           {TESTIMONIALS.map((t, i) => (
             <button
