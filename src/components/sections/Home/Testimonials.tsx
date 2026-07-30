@@ -1,4 +1,7 @@
-import { Quote } from "lucide-react";
+"use client";
+
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Quote, Star, ChevronLeft, ChevronRight } from "lucide-react";
 
 const TESTIMONIALS = [
   {
@@ -14,39 +17,211 @@ const TESTIMONIALS = [
     role: "Parent of student",
   },
   {
-    quote:
-      "The small class meant no hiding. I had to be good. And then I was.",
+    quote: "The small class meant no hiding. I had to be good. And then I was.",
     name: "David Chen",
     role: "Engineering student, Imperial",
   },
 ];
 
+const AUTOPLAY_MS = 5000;
+
 export default function Testimonials() {
+  const [visibleCount, setVisibleCount] = useState(3);
+  const [index, setIndex] = useState(0); // logical index, can exceed bounds; we mod it
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const trackRef = useRef(null);
+  const dragStartX = useRef(0);
+  const dragCurrentX = useRef(0);
+  const autoplayRef = useRef(null);
+
+  const count = TESTIMONIALS.length;
+
+  // Responsive visible-card count
+  useEffect(() => {
+    const updateVisible = () => {
+      if (window.innerWidth >= 1024) setVisibleCount(3);
+      else if (window.innerWidth >= 768) setVisibleCount(2);
+      else setVisibleCount(1);
+    };
+    updateVisible();
+    window.addEventListener("resize", updateVisible);
+    return () => window.removeEventListener("resize", updateVisible);
+  }, []);
+
+  const slideWidthPct = 100 / visibleCount;
+
+  const goTo = useCallback((newIndex) => {
+    setIndex(newIndex);
+  }, []);
+
+  const next = useCallback(() => setIndex((i) => i + 1), []);
+  const prev = useCallback(() => setIndex((i) => i - 1), []);
+
+  // Autoplay loop
+  useEffect(() => {
+    if (isPaused || isDragging) return;
+    autoplayRef.current = setInterval(() => {
+      setIndex((i) => i + 1);
+    }, AUTOPLAY_MS);
+    return () => clearInterval(autoplayRef.current);
+  }, [isPaused, isDragging]);
+
+  // Normalize the active dot (0-indexed within TESTIMONIALS.length)
+  const activeDot = ((index % count) + count) % count;
+
+  // Drag / swipe handlers
+  const handleDragStart = (clientX) => {
+    setIsDragging(true);
+    dragStartX.current = clientX;
+    dragCurrentX.current = clientX;
+  };
+
+  const handleDragMove = (clientX) => {
+    if (!isDragging) return;
+    dragCurrentX.current = clientX;
+    setDragOffset(clientX - dragStartX.current);
+  };
+
+  const handleDragEnd = () => {
+    if (!isDragging) return;
+    const delta = dragCurrentX.current - dragStartX.current;
+    const threshold = 60;
+    if (delta > threshold) prev();
+    else if (delta < -threshold) next();
+    setIsDragging(false);
+    setDragOffset(0);
+  };
+
+  // Build an extended track so the slider always has a card to show while
+  // looping seamlessly in either direction.
+  const extended = [];
+  for (let i = -visibleCount; i < count + visibleCount; i++) {
+    const t = TESTIMONIALS[((i % count) + count) % count];
+    extended.push({ ...t, key: `${i}-${t.name}` });
+  }
+  const baseOffset = visibleCount; // where the "real" set starts in `extended`
+  const translatePct =
+    -(baseOffset + index) * slideWidthPct +
+    (dragOffset / (trackRef.current?.offsetWidth || 1)) * 100;
+
   return (
-    <section className="bg-white px-4 py-20">
+    <section className="bg-[#F8FAFC] px-4 py-20">
       <div className="mx-auto max-w-5xl">
         {/* Heading */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-[#0B1D3A]">Testimonials</h2>
-          <p className="mt-2 text-sm text-gray-500">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#0052C2]">
+            Proven Success
+          </span>
+          <h2 className="mt-3 text-3xl font-extrabold text-[#1A2552] md:text-4xl">
             The work speaks through those who did it
-          </p>
+          </h2>
         </div>
 
-        {/* Cards */}
-        <div className="mt-12 grid grid-cols-1 gap-10 md:grid-cols-3">
-          {TESTIMONIALS.map((testimonial) => (
-            <div key={testimonial.name} className="flex flex-col items-center text-center">
-              <Quote className="h-6 w-6 text-[#0B1D3A]" />
-              <p className="mt-4 text-sm text-gray-600">
-                &ldquo;{testimonial.quote}&rdquo;
-              </p>
-              <div className="mt-6 h-10 w-10 rounded-full bg-gray-200" />
-              <p className="mt-3 text-sm font-semibold text-[#0B1D3A]">
-                {testimonial.name}
-              </p>
-              <p className="text-xs text-gray-500">{testimonial.role}</p>
+        {/* Slider */}
+        <div
+          className="relative mt-12"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => {
+            setIsPaused(false);
+            handleDragEnd();
+          }}
+        >
+          <div className="overflow-hidden">
+            <div
+              ref={trackRef}
+              className="flex select-none"
+              style={{
+                transform: `translateX(${translatePct}%)`,
+                transition: isDragging ? "none" : "transform 500ms ease",
+                cursor: isDragging ? "grabbing" : "grab",
+              }}
+              onMouseDown={(e) => handleDragStart(e.clientX)}
+              onMouseMove={(e) => handleDragMove(e.clientX)}
+              onMouseUp={handleDragEnd}
+              onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+              onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
+              onTouchEnd={handleDragEnd}
+            >
+              {extended.map((testimonial) => (
+                <div
+                  key={testimonial.key}
+                  className="shrink-0 px-3"
+                  style={{ width: `${slideWidthPct}%` }}
+                >
+                  <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-sm md:p-10">
+                    {/* Watermark quote icon */}
+                    <Quote
+                      className="pointer-events-none absolute -right-3 -top-3 h-24 w-24 text-[#0052C2]/10"
+                      strokeWidth={1.5}
+                    />
+                    {/* Top accent bar */}
+                    <div className="absolute left-0 top-0 h-1 w-full bg-[#F2994A]" />
+
+                    <div className="relative">
+                      <div className="flex gap-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className="h-4 w-4 fill-[#F2994A] text-[#F2994A]"
+                          />
+                        ))}
+                      </div>
+                      <p className="mt-5 text-base italic leading-relaxed text-[#334155] md:text-lg">
+                        &ldquo;{testimonial.quote}&rdquo;
+                      </p>
+                    </div>
+
+                    <div className="relative mt-8">
+                      <p className="text-base font-bold text-[#1A2552]">
+                        {testimonial.name}
+                      </p>
+                      <p className="text-xs font-medium text-[#0052C2]">
+                        {testimonial.role}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
+
+          {/* Navigation controls */}
+          <div className="mt-8 flex items-center justify-center gap-4 md:absolute md:-right-2 md:top-1/2 md:mt-0 md:-translate-y-1/2 md:flex-col md:justify-start md:gap-3">
+            <button
+              type="button"
+              aria-label="Previous testimonial"
+              onClick={prev}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E2E8F0] bg-white text-[#1A2552] shadow-sm transition-colors hover:bg-[#1A2552] hover:text-white"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next testimonial"
+              onClick={next}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E2E8F0] bg-white text-[#1A2552] shadow-sm transition-colors hover:bg-[#1A2552] hover:text-white"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Pagination dots */}
+        <div className="mt-8 flex items-center justify-center gap-2">
+          {TESTIMONIALS.map((t, i) => (
+            <button
+              key={t.name}
+              type="button"
+              aria-label={`Go to testimonial ${i + 1}`}
+              onClick={() => goTo(i)}
+              className={
+                i === activeDot
+                  ? "h-2 w-8 rounded-full bg-[#0052C2] transition-all"
+                  : "h-2 w-2 rounded-full bg-gray-300 transition-all"
+              }
+            />
           ))}
         </div>
       </div>
