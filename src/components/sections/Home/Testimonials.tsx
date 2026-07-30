@@ -52,7 +52,7 @@ export default function Testimonials() {
 
   const slideWidthPct = 100 / visibleCount;
 
-  const goTo = useCallback((newIndex) => {
+  const goTo = useCallback((newIndex: number) => {
     setIndex(newIndex);
   }, []);
 
