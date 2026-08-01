@@ -12,7 +12,7 @@ export default function ClassFormat() {
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
             Class format
           </p>
-          <h2 className="mt-2 text-3xl font-bold text-primary">
+          <h2 className="mt-2 text-[48px] font-extrabold leading-tight text-primary">
             Small enough to actually teach you
           </h2>
         </div>

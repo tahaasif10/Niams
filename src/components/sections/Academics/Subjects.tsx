@@ -45,7 +45,7 @@ export default function Subjects() {
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
             Courses
           </p>
-          <h2 className="mt-2 text-3xl font-bold text-primary">
+          <h2 className="mt-2 text-[48px] font-extrabold leading-tight text-primary">
             Every subject we teach
           </h2>
           <p className="mt-2 text-sm text-gray-500">

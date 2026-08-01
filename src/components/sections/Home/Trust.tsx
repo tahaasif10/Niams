@@ -1,9 +1,24 @@
-import { Play } from "lucide-react";
+import { GraduationCap, ShieldCheck, TrendingUp } from "lucide-react";
 
 const STATS = [
-  { value: "500+", label: "Students taught and sharpened" },
-  { value: "38%", label: "Average grade improvement" },
-  { value: "98%", label: "Would recommend us" },
+  {
+    value: "500+",
+    label: "Students taught and sharpened",
+    note: "and counting",
+    icon: GraduationCap,
+  },
+  {
+    value: "38%",
+    label: "Average grade improvement",
+    note: "measured across one full term",
+    icon: TrendingUp,
+  },
+  {
+    value: "98%",
+    label: "Would recommend us",
+    note: "surveyed after final exams",
+    icon: ShieldCheck,
+  },
 ];
 
 // Splits a stat value like "500+" or "98%" into the number and its
@@ -13,7 +28,7 @@ function StatValue({ value }: { value: string }) {
   if (!match) return <span>{value}</span>;
   const [, number, symbol] = match;
   return (
-    <span>
+    <span className="tabular-nums">
       {number}
       {symbol && <span className="text-accent-hover">{symbol}</span>}
     </span>
@@ -27,58 +42,55 @@ export default function Trust() {
         {/* Heading */}
         <div className="text-center">
           <p className="text-xs font-bold uppercase tracking-widest text-accent-hover">
-            Trust
+            Track record
           </p>
           <h2 className="mt-2 text-3xl font-bold text-primary">
-            Numbers do not lie
+            Every number, on the record
           </h2>
           <p className="mt-2 text-sm text-gray-500">
-            The record of our work, written in hard figures
+            No rounding up. This is the file we&apos;d hand you if you asked.
           </p>
         </div>
 
-        {/* Stats + Video */}
-        <div className="mt-12 grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center">
-          {/* Stats */}
-          <div className="flex flex-col gap-5">
-            {STATS.map((stat) => (
-              <div
-                key={stat.label}
-                className="border-y border-r border-l-4 border-line border-l-accent bg-white p-4 rounded-r-xl shadow-sm"
-              >
-                <p className="text-4xl font-bold text-primary">
-                  <StatValue value={stat.value} />
-                </p>
-                <p className="mt-1 text-sm text-gray-500">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Video placeholder */}
-          <div className="relative h-72 overflow-hidden rounded-2xl border border-line bg-gradient-to-tr from-primary to-primary-hover shadow-md sm:h-96">
-            {/* Subtle mesh/pattern overlay for texture */}
-            <div
-              className="absolute inset-0 opacity-20"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.4) 0, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.3) 0, transparent 45%)",
-              }}
-            />
-
-            {/* Play button */}
-            <div className="relative flex h-full items-center justify-center">
-              <button
-                aria-label="Play video"
-                className="flex h-16 w-16 items-center justify-center rounded-full bg-accent shadow-lg transition-transform duration-300 hover:scale-105 hover:bg-accent-hover hover:shadow-accent/30"
-              >
-                <Play className="h-6 w-6 fill-white text-white" />
-              </button>
+        {/* Trust strip */}
+        <div className="relative mt-14">
+          <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
+            <div className="flex items-center justify-between bg-primary px-6 py-3">
+              <p className="text-xs font-bold uppercase tracking-widest text-white">
+                Outcomes record
+              </p>
+              <p className="text-xs font-medium text-white/60">NIAMS</p>
             </div>
 
-            {/* Badge overlay */}
-            <div className="absolute bottom-4 left-4 rounded-full bg-black/40 px-3 py-1 backdrop-blur-sm">
-              <p className="text-xs font-medium text-white">
-                Watch 1-Min Tour
+            <div className="flex flex-col divide-y divide-dashed divide-line sm:flex-row sm:divide-x sm:divide-y-0">
+              {STATS.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="flex flex-1 items-start gap-4 px-6 py-6"
+                >
+                  <stat.icon className="mt-1 h-4 w-4 shrink-0 text-accent-hover" />
+                  <div>
+                    <p className="text-3xl font-bold text-primary">
+                      <StatValue value={stat.value} />
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-primary">
+                      {stat.label}
+                    </p>
+                    <p className="text-xs text-gray-500">{stat.note}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Seal — stamped on the corner of the record */}
+          <div className="absolute -right-4 -top-6 z-10 hidden sm:block">
+            <div className="flex h-20 w-20 rotate-[8deg] flex-col items-center justify-center rounded-full border-2 border-dashed border-accent bg-white text-center shadow-sm">
+              <ShieldCheck className="h-4 w-4 text-accent-hover" />
+              <p className="mt-1 text-[8px] font-bold uppercase leading-tight tracking-widest text-primary">
+                Verified
+                <br />
+                Results
               </p>
             </div>
           </div>

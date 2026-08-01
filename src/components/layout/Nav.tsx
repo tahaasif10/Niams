@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Academics", href: "/academics" },
-  { label: "Admissions", href: "/admissions" },
+  // { label: "Admissions", href: "/admissions" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -31,7 +31,7 @@ export default function Navbar() {
       : "border-b border-transparent bg-white/40 backdrop-blur-md"
   }`}
 >
-  <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-2">
+  <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-0">
     {/* Logo / school name */}
     <Link href="/" className="flex items-center gap-3">
       <Image
@@ -42,6 +42,9 @@ export default function Navbar() {
         className="h-20 w-20 object-contain"
         priority
       />
+    <span className="font-kalam text-2xl text-primary font-bold">
+      Niams
+    </span>
     </Link>
 
     {/* Desktop links */}

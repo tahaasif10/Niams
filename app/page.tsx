@@ -2,7 +2,7 @@ import Hero from "@/src/components/sections/Home/Hero";
 import Method from "@/src/components/sections/Home/Method";
 import Trust from "@/src/components/sections/Home/Trust";
 import Courses from "@/src/components/sections/Home/Courses";
-import Testimonials from "@/src/components/sections/Home/Testimonials";
+// import Testimonials from "@/src/components/sections/Home/Testimonials";
 import CTA from "@/src/components/sections/Home/Cta";
 
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
       <Method />
       <Trust />
       <Courses />
-      <Testimonials />
+      {/* <Testimonials /> */}
       <CTA/>
       {/* Add more sections below, e.g. <Features />, <Testimonials />, <CTA /> */}
     </main>

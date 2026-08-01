@@ -33,7 +33,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden bg-white px-4 py-20 sm:py-24">
+    <section className="relative overflow-hidden bg-white px-4 pt-6 pb-16 sm:pt-8 sm:pb-20">
       {/* Ambient light glows — premium light-mode depth */}
       <div
         aria-hidden
@@ -59,9 +59,9 @@ export default function Hero() {
           </div>
 
           <h1 className="mt-6 text-4xl font-bold leading-tight text-primary sm:text-5xl">
-            Forge your future with{" "}
+            Master AI, Digital Marketing & Core Academics with{" "}
             <span className="relative whitespace-nowrap bg-linear-to-r from-[#c9a875] via-[#ad8a54] to-[#8a6a3a] bg-[length:200%_auto] bg-clip-text text-transparent animate-[shimmer_3s_ease-in-out_infinite]">
-              clear, hard thinking
+              Personalized Coaching
               <svg
                 aria-hidden
                 viewBox="0 0 200 12"

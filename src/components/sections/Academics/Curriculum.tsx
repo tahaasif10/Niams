@@ -30,7 +30,7 @@ export default function Curriculum() {
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
             Curriculum
           </p>
-          <h2 className="mt-2 text-3xl font-bold text-primary">
+          <h2 className="mt-2 text-[48px] font-extrabold leading-tight text-primary">
             How each course is built
           </h2>
           <p className="mt-2 text-sm text-gray-500">
